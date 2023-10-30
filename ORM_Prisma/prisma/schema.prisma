@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,20 +8,63 @@ datasource db {
 }
 
 model Courses {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  duration    Int
-  created_at  DateTime @default(now())
+  id             String           @id @default(uuid())
+  name           String           @unique
+  description    String?
+  duration       Int
+  created_at     DateTime         @default(now())
+  fk_id_teacher  String           @unique
+  teacher        Teachers         @relation(fields: [fk_id_teacher], references: [id])
+  CoursesModules CoursesModules[]
 
   @@map("courses")
 }
 
-model Moddules {
-  id          String   @id @default(uuid())
-  name        String   @unique
+model Modules {
+  id          String           @id @default(uuid())
+  name        String           @unique
   description String
-  created_at  DateTime @default(now())
+  created_at  DateTime         @default(now())
+  courses     CoursesModules[]
 
   @@map("modules")
+}
+
+model CoursesModules {
+  id           String   @id @default(uuid())
+  fk_id_course String
+  fk_id_module String
+  created_at   DateTime @default(now())
+  course       Courses  @relation(fields: [fk_id_course], references: [id])
+  module       Modules  @relation(fields: [fk_id_module], references: [id])
+
+  @@index([fk_id_course], map: "courses_modules_fk_id_course_fkey")
+  @@index([fk_id_module], map: "courses_modules_fk_id_module_fkey")
+  @@map("courses_modules")
+}
+
+model Teachers {
+  id     String   @id @default(uuid())
+  name   String   @unique
+  course Courses?
+
+  @@map("teachers")
+}
+
+model Authors {
+  id    String  @id @default(uuid())
+  name  String  @unique
+  books Books[]
+
+  @@map("authors")
+}
+
+model Books {
+  id        String  @id @default(uuid())
+  name      String  @unique
+  author_id String
+  author    Authors @relation(fields: [author_id], references: [id])
+
+  @@index([author_id], map: "books_author_id_fkey")
+  @@map("books")
 }
